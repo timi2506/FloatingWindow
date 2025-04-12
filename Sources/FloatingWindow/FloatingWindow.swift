@@ -83,15 +83,16 @@ struct FloatingWindow<WindowContent>: ViewModifier where WindowContent: View {
     var windowTitle: String
     var windowBarStyle: WindowBarStyle
     @Binding var isPresented: Bool
-    @State var width: CGFloat = 150
-    @State var height: CGFloat = 75
-    @State var lastWidth: CGFloat = 150
-    @State var lastHeight: CGFloat = 75
+    @State var width: CGFloat
+    @State var height: CGFloat
+    @State var lastWidth: CGFloat
+    @State var lastHeight: CGFloat
     @State var offset: CGSize = CGSize(width: 0, height: 0)
     @State var lastOffset: CGSize = CGSize(width: 0, height: 0)
     @State var moveWindow = false
     @State var cantClose = false
-    
+    let minHeight: CGFloat
+    let minWidth: CGFloat
     func body(content: Content) -> some View {
         ZStack {
             content
@@ -195,8 +196,8 @@ struct FloatingWindow<WindowContent>: ViewModifier where WindowContent: View {
                 .overlay(alignment: .bottomTrailing) {
                     HandleShape(cornerRadius: 100, edge: .bottomTrailing)
                         .stroke(LinearGradient(colors: [.gray.opacity(0.10), .primary.opacity(0.5), .gray.opacity(0.10)], startPoint: .topTrailing, endPoint: .bottomLeading), lineWidth: 3)
-                        .opacity(height <= 50 ? 0 : 1)
-                        .opacity(width <= 125 ? 0 : 1)
+                        .opacity(height <= minHeight ? 0 : 1)
+                        .opacity(width <= minWidth ? 0 : 1)
                         .frame(width: 20, height: 20)
                         .contentShape(Rectangle())
                         .gesture(
@@ -206,14 +207,14 @@ struct FloatingWindow<WindowContent>: ViewModifier where WindowContent: View {
                                     height = lastHeight + gesture.translation.height
                                 }
                                 .onEnded { _ in
-                                    if height <= 75 {
+                                    if height <= minHeight {
                                         withAnimation(.bouncy) {
-                                            height = 75
+                                            height = minHeight
                                         }
                                     }
-                                    if width <= 150 {
+                                    if width <= minWidth {
                                         withAnimation(.bouncy) {
-                                            width = 150
+                                            width = minWidth
                                         }
                                     }
                                     lastHeight = height
@@ -249,10 +250,12 @@ extension View {
     public func floatingWindow<WindowContent: View>(
         isPresented: Binding<Bool>? = .constant(true),
         windowTitle: String? = "Window",
-        windowBarStyle: WindowBarStyle? = .titleBar ,
+        windowBarStyle: WindowBarStyle? = .titleBar,
+        minHeight: CGFloat? = 125,
+        minWidth: CGFloat? = 150,
         @ViewBuilder content: @escaping () -> WindowContent
     ) -> some View {
-        modifier(FloatingWindow(windowContent: content, windowTitle: windowTitle!, windowBarStyle: windowBarStyle!, isPresented: isPresented!))
+        modifier(FloatingWindow(windowContent: content, windowTitle: windowTitle!, windowBarStyle: windowBarStyle!, isPresented: isPresented!, width: minWidth!, height: minHeight!, lastWidth: minWidth!, lastHeight: minHeight!, minHeight: minHeight!, minWidth: minWidth!))
     }
 }
 
