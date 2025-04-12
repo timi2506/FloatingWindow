@@ -3,3 +3,6 @@ Swift Package entirely coded on iPad using Swift Playgrounds, my fingers already
 Usage (bare): .floatingWindow(parameters) {
       content
 }
+
+
+Check the FloatingWindow.swift file to see the code :D
